@@ -5,13 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.compose.rememberNavController
 import com.example.pasteleriaandroid.navigation.AppNavGraph
-import com.example.pasteleriaandroid.ui.theme.MilSaboresTheme
+import com.example.pasteleriaandroid.ui.theme.PasteleriaAndroidTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MilSaboresTheme {
+            PasteleriaAndroidTheme {
                 val nav = rememberNavController()
                 AppNavGraph(nav)
             }
