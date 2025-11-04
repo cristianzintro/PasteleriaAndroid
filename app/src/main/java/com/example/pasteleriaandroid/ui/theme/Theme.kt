@@ -1,38 +1,53 @@
 package com.example.pasteleriaandroid.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.toArgb 
 import androidx.compose.ui.graphics.Color
+import android.app.Activity
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val LightColors = lightColorScheme(
-    primary = Purple40,
+    primary = PinkPrimary,
     onPrimary = Color.White,
-    secondary = Pink40,
-    onSecondary = Color.White,
-    tertiary = PurpleGrey40,
-    background = Color(0xFFFFFBFE),
-    onBackground = Color(0xFF1C1B1F),
-    surface = Color(0xFFFFFBFE),
-    onSurface = Color(0xFF1C1B1F)
-)
+    primaryContainer = PinkPastel,
+    onPrimaryContainer = ChocoText,
 
-private val DarkColors = darkColorScheme(
-    primary = Purple80,
-    onPrimary = Color(0xFF1C1B1F),
-    secondary = Pink80,
-    onSecondary = Color(0xFF1C1B1F),
-    tertiary = PurpleGrey80,
-    background = Color(0xFF1C1B1F),
-    onBackground = Color(0xFFE6E1E5),
-    surface = Color(0xFF1C1B1F),
-    onSurface = Color(0xFFE6E1E5)
+    secondary = MintAccent,
+    onSecondary = ChocoText,
+
+    background = CreamBackground,
+    onBackground = ChocoText,
+
+    surface = Color.White,
+    onSurface = ChocoText,
+
+    error = Color(0xFFB3261E)
 )
 
 @Composable
 fun MilSaboresTheme(
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(colorScheme = if (useDarkTheme) DarkColors else LightColors, content = content)
+    // vamos a forzar claro porque es una pastelería
+    val colorScheme = LightColors
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        val window = (view.context as Activity).window
+        WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+        window.statusBarColor = colorScheme.primary.toArgb()
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography,
+        content = content
+    )
 }

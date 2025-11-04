@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -71,12 +72,15 @@ fun ProductoCardSoloImagen(
     producto: ProductEntity,
     onAddToCart: () -> Unit
 ) {
-    // MODO SEGURO: usamos un drawable que sabemos que existe
+    // Por ahora usamos una imagen segura
     val imagenRes = R.drawable.ic_launcher_foreground
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White   // Fondo suave
+        ),
+        elevation = CardDefaults.cardElevation(2.dp) // Sombra ligera
     ) {
         Column {
             Image(

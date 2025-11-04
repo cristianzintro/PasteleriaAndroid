@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
         ProductEntity::class,
         ClienteEntity::class
     ],
-    version = 2,               // <- subimos versión
+    version = 3,               // <- subimos versión
     exportSchema = false
 )
 abstract class MilSaboresDb : RoomDatabase() {

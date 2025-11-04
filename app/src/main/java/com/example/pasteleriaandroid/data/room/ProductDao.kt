@@ -18,7 +18,6 @@ interface ProductDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(products: List<ProductEntity>)
 
-    // 👇 para saber si tenemos que sembrar
     @Query("SELECT COUNT(*) FROM productos")
     suspend fun count(): Int
 }
