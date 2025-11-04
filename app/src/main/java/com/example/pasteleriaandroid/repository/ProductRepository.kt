@@ -5,6 +5,6 @@ import com.example.pasteleriaandroid.data.room.ProductEntity
 import kotlinx.coroutines.flow.Flow
 
 class ProductRepository(private val dao: ProductDao) {
-    fun getAllProducts(): Flow<List<ProductEntity>> = dao.getAll()
-    suspend fun insertProducts(list: List<ProductEntity>) = dao.upsertAll(list)
+    fun getAll(): Flow<List<ProductEntity>> = dao.getAll()
+    suspend fun upsertAll(items: List<ProductEntity>) = dao.upsertAll(items)
 }
