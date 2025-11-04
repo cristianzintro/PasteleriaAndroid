@@ -1,19 +1,24 @@
 package com.example.pasteleriaandroid.data.room
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductDao {
-    @Query("SELECT * FROM products")
+
+    @Query("SELECT * FROM productos")
     fun getAll(): Flow<List<ProductEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsertAll(items: List<ProductEntity>)
+    suspend fun insert(product: ProductEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(item: ProductEntity)
+    suspend fun insertAll(products: List<ProductEntity>)
 
-    @Query("DELETE FROM products")
-    suspend fun clear()
+    // 👇 para saber si tenemos que sembrar
+    @Query("SELECT COUNT(*) FROM productos")
+    suspend fun count(): Int
 }

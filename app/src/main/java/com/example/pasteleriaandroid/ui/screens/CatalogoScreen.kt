@@ -56,7 +56,7 @@ fun CatalogoScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(productos) { p ->
-                    ProductoCard(
+                    ProductoCardSoloImagen(
                         producto = p,
                         onAddToCart = { cartVM.addProduct(p) }
                     )
@@ -67,43 +67,38 @@ fun CatalogoScreen(
 }
 
 @Composable
-fun ProductoCard(producto: ProductEntity, onAddToCart: () -> Unit) {
+fun ProductoCardSoloImagen(
+    producto: ProductEntity,
+    onAddToCart: () -> Unit
+) {
+    // MODO SEGURO: usamos un drawable que sabemos que existe
+    val imagenRes = R.drawable.ic_launcher_foreground
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
-            // 👇👇 AQUI ES DONDE CAMBIAS LA IMAGEN 👇👇
             Image(
-                painter = painterResource(id = R.drawable.tarta_de_chocolate_background),
-                // ↑ cambia "torta_chocolate" por el nombre de tu imagen en drawable
+                painter = painterResource(id = imagenRes),
                 contentDescription = producto.nombre,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp),
                 contentScale = ContentScale.Crop
             )
-            // 👆👆 AQUI ES DONDE GESTIONAS LA RUTA / NOMBRE 👆👆
 
-            Column(Modifier.padding(16.dp)) {
-                Text(producto.nombre, style = MaterialTheme.typography.titleMedium)
-                Text(producto.descripcion, style = MaterialTheme.typography.bodyMedium)
-                Text(
-                    text = "$${producto.precio}",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+            Button(
+                onClick = onAddToCart,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
-                Spacer(Modifier.height(8.dp))
-                Button(
-                    onClick = onAddToCart,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text("Agregar al carrito")
-                }
+            ) {
+                Text("Agregar al carrito")
             }
         }
     }
