@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,6 +31,21 @@ fun CarritoScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Carrito de compras") },
+
+                // 👇 Botón de inicio en la esquina izquierda
+                navigationIcon = {
+                    IconButton(onClick = {
+                        nav.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.Home.route) { inclusive = false }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Home,
+                            contentDescription = "Ir al inicio"
+                        )
+                    }
+                },
+
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

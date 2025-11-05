@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
@@ -18,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.pasteleriaandroid.R
 import com.example.pasteleriaandroid.data.room.ProductEntity
+import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.CartViewModel
 import com.example.pasteleriaandroid.viewmodel.ProductViewModel
 
@@ -34,6 +37,21 @@ fun CatalogoScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Catálogo Mil Sabores") },
+
+                // 👇 Aquí agregamos el botón para volver al Home
+                navigationIcon = {
+                    IconButton(onClick = {
+                        nav.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.Home.route) { inclusive = false }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Home,
+                            contentDescription = "Volver al inicio"
+                        )
+                    }
+                },
+
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -57,7 +75,7 @@ fun CatalogoScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(productos) { p ->
-                    ProductoCardSoloImagen(
+                    ProductoCard(
                         producto = p,
                         onAddToCart = { cartVM.addProduct(p) }
                     )
@@ -68,19 +86,21 @@ fun CatalogoScreen(
 }
 
 @Composable
-fun ProductoCardSoloImagen(
+fun ProductoCard(
     producto: ProductEntity,
     onAddToCart: () -> Unit
 ) {
-    // Por ahora usamos una imagen segura
-    val imagenRes = R.drawable.ic_launcher_foreground
+    val imagenRes = when (producto.imagen) {
+        "torta_de_chocolate" -> R.drawable.torta_de_chocolate
+        "tarta_de_fresa" -> R.drawable.tarta_de_fresa
+        "mil_hojas" -> R.drawable.mil_hojas
+        else -> R.drawable.ic_launcher_foreground
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White   // Fondo suave
-        ),
-        elevation = CardDefaults.cardElevation(2.dp) // Sombra ligera
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column {
             Image(
@@ -92,17 +112,32 @@ fun ProductoCardSoloImagen(
                 contentScale = ContentScale.Crop
             )
 
-            Button(
-                onClick = onAddToCart,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text("Agregar al carrito")
+                Text(
+                    text = producto.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Precio: $${producto.precio}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Button(
+                    onClick = onAddToCart,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text("Agregar al carrito")
+                }
             }
         }
     }

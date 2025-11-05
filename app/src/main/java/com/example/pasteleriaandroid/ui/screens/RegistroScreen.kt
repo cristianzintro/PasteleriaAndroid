@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.*
@@ -15,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.RegistroViewModel
 import kotlinx.coroutines.launch
 
@@ -23,7 +26,7 @@ import kotlinx.coroutines.launch
 fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
     val state by vm.state.collectAsState()
 
-    // 👇 estado del snackbar y scope para lanzarlo
+    // estado del snackbar y scope para lanzarlo
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -32,6 +35,21 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
         topBar = {
             TopAppBar(
                 title = { Text("Registro de cliente") },
+
+                // 👇 botón para volver al home
+                navigationIcon = {
+                    IconButton(onClick = {
+                        nav.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.Home.route) { inclusive = false }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Home,
+                            contentDescription = "Volver al inicio"
+                        )
+                    }
+                },
+
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -83,12 +101,12 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
 
             Button(
                 onClick = {
-                    // validamos desde el VM
                     vm.enviar {
-                        // si pasó la validación, mostramos snackbar
                         scope.launch {
                             snackbarHostState.showSnackbar("¡Cuenta creada con éxito! 🎉")
                         }
+                        // si quieres también puedes volver al home aquí:
+                        // nav.navigate(AppRoute.Home.route) { popUpTo(AppRoute.Home.route) { inclusive = false } }
                     }
                 },
                 enabled = state.esValido,
@@ -129,7 +147,6 @@ private fun CampoTexto(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // 👇 Animación de aparición/desaparición del texto de error
         AnimatedVisibility(
             visible = error != null,
             enter = fadeIn(),

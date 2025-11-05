@@ -14,12 +14,11 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
     private val db = DatabaseModule.getDatabase(app)
     private val repo = ProductRepository(db.productDao())
 
-    // flujo de productos para la UI
     val productos = repo.getProductos()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     init {
-        // 👇 semilla automática
+        // 👇 al crear el VM, aseguramos que haya productos
         viewModelScope.launch {
             repo.seedIfEmpty()
         }
