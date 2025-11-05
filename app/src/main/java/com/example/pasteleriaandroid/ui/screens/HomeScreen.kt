@@ -27,7 +27,6 @@ fun HomeScreen(nav: NavController) {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // circulito rosa con icono de torta (fake por ahora)
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
@@ -58,132 +57,59 @@ fun HomeScreen(nav: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // --- Chip de bienvenida ---
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(Color(0xFFFF7FB0))
-                    .padding(horizontal = 18.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "¡Celebra la dulzura de la vida!",
-                    color = Color.White,
-                    fontSize = 13.sp
-                )
-            }
-
-            // --- Título grande ---
             Text(
-                text = "Pastelería 1000 Sabores",
+                text = "Bienvenido a Pastelería Mil Sabores 🎂",
                 color = Color(0xFF5A3A2E),
-                fontSize = 30.sp,
-                lineHeight = 34.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
 
-            // --- Descripción ---
             Text(
-                text = "✨ Con más de 50 años de tradición familiar, seguimos endulzando la vida de quienes nos acompañan.",
-                color = Color(0xFF5A3A2E),
-                fontSize = 14.sp
+                text = "¿Qué quieres hacer hoy?",
+                color = Color(0xFF5A3A2E)
             )
 
-            // --- Botones principales ---
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = { nav.navigate(AppRoute.Catalogo.route) },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFAC5A29),
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Text("Ver catálogo")
-                }
-                OutlinedButton(
-                    onClick = { /* descuentos o futura pantalla */ },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color(0xFF5A3A2E)
-                    )
-                ) {
-                    Text("Activar descuentos")
-                }
-            }
-
-            // --- Card de producto estrella (placeholder) ---
-            Card(
+            // 👉 catálogo
+            Button(
+                onClick = { nav.navigate(AppRoute.Catalogo.route) },
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                ),
                 shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.cardElevation(2.dp)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFAC5A29),
+                    contentColor = Color.White
+                )
             ) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Emblema de la casa",
-                        color = Color(0xFF5A3A2E),
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "Paleta crema, rosa y chocolate.",
-                        color = Color(0xFF5A3A2E),
-                        fontSize = 13.sp
-                    )
-                }
+                Text("Ver catálogo")
             }
 
-            // --- Misión y visión ---
-            Row(
+            // 👉 carrito
+            OutlinedButton(
+                onClick = { nav.navigate(AppRoute.Carrito.route) },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                shape = RoundedCornerShape(20.dp)
             ) {
-                Card(
-                    modifier = Modifier.weight(1f),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    shape = RoundedCornerShape(18.dp),
-                    elevation = CardDefaults.cardElevation(1.dp)
-                ) {
-                    Column(Modifier.padding(14.dp)) {
-                        Text(
-                            text = "Misión",
-                            color = Color(0xFF5A3A2E),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            text = "Creamos momentos dulces y memorables con productos artesanales.",
-                            color = Color(0xFF5A3A2E),
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-                Card(
-                    modifier = Modifier.weight(1f),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    shape = RoundedCornerShape(18.dp),
-                    elevation = CardDefaults.cardElevation(1.dp)
-                ) {
-                    Column(Modifier.padding(14.dp)) {
-                        Text(
-                            text = "Visión",
-                            color = Color(0xFF5A3A2E),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            text = "Ser la pastelería de referencia para las familias dulceras de la región.",
-                            color = Color(0xFF5A3A2E),
-                            fontSize = 12.sp
-                        )
-                    }
-                }
+                Text("Ir al carrito")
+            }
+
+            // 👉 registro
+            OutlinedButton(
+                onClick = { nav.navigate(AppRoute.Registro.route) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFF5A3A2E)
+                )
+            ) {
+                Text("Registrarse")
+            }
+
+            // 👉 clientes (ya que tienes ClientesScreen.kt)
+            OutlinedButton(
+                onClick = { nav.navigate(AppRoute.Clientes.route) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Text("Ver clientes")
             }
         }
     }

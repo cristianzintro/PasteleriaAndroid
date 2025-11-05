@@ -12,25 +12,34 @@ fun AppNavGraph(nav: NavHostController) {
         navController = nav,
         startDestination = AppRoute.Home.route
     ) {
-        composable(AppRoute.Home.route) { HomeScreen(nav) }
-        composable(AppRoute.Catalogo.route) { CatalogoScreen(nav) }
+        // HOME
+        composable(AppRoute.Home.route) {
+            HomeScreen(nav)
+        }
 
-        // 🔹 Pantalla Carrito
+        // CATÁLOGO
+        composable(AppRoute.Catalogo.route) {
+            CatalogoScreen(nav)
+        }
+
+        // CARRITO
         composable(AppRoute.Carrito.route) {
-            // Si CarritoScreen no existe aún, esto evita errores de compilación
             CarritoScreen(nav)
         }
 
-        // 🔹 Pantalla Registro
+        // REGISTRO
         composable(AppRoute.Registro.route) {
             RegistroScreen(nav)
         }
-        composable(AppRoute.Clientes.route) { ClientesScreen(nav) }
 
+        // CLIENTES (ya que lo tienes en tu estructura)
+        composable(AppRoute.Clientes.route) {
+            ClientesScreen(nav)
+        }
 
-        // 🔹 Pantalla Detalle con argumento "id"
-        composable(AppRoute.Detalle.route) { backStack ->
-            val id = backStack.arguments?.getString(AppRoute.Detalle.ARG_ID) ?: ""
+        // DETALLE (con argumento)
+        composable(AppRoute.Detalle.route) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString(AppRoute.ARG_ID) ?: ""
             DetalleProductoScreen(nav, id)
         }
     }
