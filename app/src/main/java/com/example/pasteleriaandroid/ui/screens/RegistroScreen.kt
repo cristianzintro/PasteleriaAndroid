@@ -109,6 +109,7 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
                         // nav.navigate(AppRoute.Home.route) { popUpTo(AppRoute.Home.route) { inclusive = false } }
                     }
                 },
+
                 enabled = state.esValido,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(

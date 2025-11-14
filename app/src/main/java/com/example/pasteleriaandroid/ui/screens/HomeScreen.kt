@@ -68,7 +68,12 @@ fun HomeScreen(nav: NavController) {
                 text = "¿Qué quieres hacer hoy?",
                 color = Color(0xFF5A3A2E)
             )
-
+            Button(
+                onClick = { nav.navigate(AppRoute.Posts.route) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver Posts desde API")
+            }
             // 👉 catálogo
             Button(
                 onClick = { nav.navigate(AppRoute.Catalogo.route) },

@@ -13,5 +13,5 @@ interface ClienteDao {
     fun getAll(): Flow<List<ClienteEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(cliente: ClienteEntity)
+    suspend fun insert(cliente: ClienteEntity): Long
 }

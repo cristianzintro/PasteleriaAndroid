@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,16 +24,20 @@ import com.example.pasteleriaandroid.viewmodel.CartViewModel
 @Composable
 fun CarritoScreen(
     nav: NavController,
+    clienteId: Int,
     vm: CartViewModel = viewModel()
 ) {
+    // cargar carrito cuando entro
+    LaunchedEffect(clienteId) {
+        vm.loadCart(clienteId)
+    }
+
     val items by vm.items.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Carrito de compras") },
-
-                // 👇 Botón de inicio en la esquina izquierda
                 navigationIcon = {
                     IconButton(onClick = {
                         nav.navigate(AppRoute.Home.route) {
@@ -45,7 +50,6 @@ fun CarritoScreen(
                         )
                     }
                 },
-
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -57,6 +61,7 @@ fun CarritoScreen(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
+                .fillMaxSize()
         ) {
             if (items.isEmpty()) {
                 Text("Tu carrito está vacío 🧁")
@@ -76,10 +81,13 @@ fun CarritoScreen(
                             ListItem(
                                 headlineContent = { Text(p.nombre) },
                                 supportingContent = {
-                                    Text("Precio: $${p.precio}")
+                                    Text("Precio: $${p.precio} • Cant: ${p.quantity}")
                                 },
                                 trailingContent = {
-                                    IconButton(onClick = { vm.removeProduct(p) }) {
+                                    IconButton(onClick = {
+                                        // si quieres eliminar 1 en específico,
+                                        // hay que agregar función extra en el VM y en el dao
+                                    }) {
                                         Icon(
                                             imageVector = Icons.Filled.Delete,
                                             contentDescription = "Eliminar"
@@ -102,7 +110,7 @@ fun CarritoScreen(
                 Spacer(Modifier.height(8.dp))
 
                 Button(
-                    onClick = { vm.clearCart() },
+                    onClick = { vm.clearCart(clienteId) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Vaciar carrito")

@@ -11,34 +11,45 @@ import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.pasteleriaandroid.R
 import com.example.pasteleriaandroid.data.room.ProductEntity
+import com.example.pasteleriaandroid.data.room.DatabaseModule
+import com.example.pasteleriaandroid.data.room.CartItemEntity
 import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.CartViewModel
 import com.example.pasteleriaandroid.viewmodel.ProductViewModel
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogoScreen(
     nav: NavController,
     productVM: ProductViewModel = viewModel(),
-    cartVM: CartViewModel = viewModel()
+    cartVM: CartViewModel = viewModel(),
+    clienteId: Int = 1 // 👈 por ahora fijo; después lo pasas por nav
 ) {
     val productos by productVM.productos.collectAsState()
+
+    // acceso a la BD
+    val context = LocalContext.current
+    val db = remember { DatabaseModule.getDatabase(context) }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Catálogo Mil Sabores") },
-
-                // 👇 Aquí agregamos el botón para volver al Home
                 navigationIcon = {
                     IconButton(onClick = {
                         nav.navigate(AppRoute.Home.route) {
@@ -51,7 +62,6 @@ fun CatalogoScreen(
                         )
                     }
                 },
-
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -77,7 +87,18 @@ fun CatalogoScreen(
                 items(productos) { p ->
                     ProductoCard(
                         producto = p,
-                        onAddToCart = { cartVM.addProduct(p) }
+                        onAddToCart = {
+                            // 👉 AQUÍ se guarda realmente en Room
+                            scope.launch {
+                                db.cartDao().addToCart(
+                                    CartItemEntity(
+                                        clienteId = clienteId,
+                                        productId = p.id,   // usa el id del producto
+                                        quantity = 1
+                                    )
+                                )
+                            }
+                        }
                     )
                 }
             }

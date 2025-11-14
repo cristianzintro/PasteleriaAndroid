@@ -1,30 +1,71 @@
 package com.example.pasteleriaandroid.viewmodel
 
-import androidx.lifecycle.ViewModel
-import com.example.pasteleriaandroid.data.room.ProductEntity
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.pasteleriaandroid.data.room.CartItemEntity
+import com.example.pasteleriaandroid.data.room.DatabaseModule
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
-class CartViewModel : ViewModel() {
+// Modelo que mostraremos en la UI
+data class CartUiItem(
+    val id: Int,
+    val nombre: String,
+    val precio: Double,   // 👈 ahora Double, igual que en ProductEntity
+    val quantity: Int
+)
 
-    private val _items = MutableStateFlow<List<ProductEntity>>(emptyList())
-    val items: StateFlow<List<ProductEntity>> = _items
+class CartViewModel(app: Application) : AndroidViewModel(app) {
 
-    fun addProduct(product: ProductEntity) {
-        _items.update { current ->
-            val existing = current.find { it.id == product.id }
-            if (existing != null) current else current + product
+    private val db = DatabaseModule.getDatabase(app)
+    private val cartDao = db.cartDao()
+    private val productDao = db.productDao()
+
+    private val _items = MutableStateFlow<List<CartUiItem>>(emptyList())
+    val items: StateFlow<List<CartUiItem>> = _items
+
+    /**
+     * Carga el carrito de un cliente específico desde Room
+     */
+    fun loadCart(clienteId: Int) {
+        viewModelScope.launch {
+            // 1) filas del carrito
+            val cartRows: List<CartItemEntity> = cartDao.getCartByCliente(clienteId)
+            // 2) productos (tu dao devuelve Flow, así que tomamos el primero)
+            val productos = productDao.getAll().first()
+
+            // 3) cruzamos carrito + productos
+            val uiList = cartRows.mapNotNull { cart ->
+                val p = productos.find { it.id == cart.productId }
+                p?.let {
+                    CartUiItem(
+                        id = cart.id,
+                        nombre = it.nombre,
+                        precio = it.precio,      // 👈 ahora coincide el tipo
+                        quantity = cart.quantity
+                    )
+                }
+            }
+
+            _items.value = uiList
         }
     }
 
-    fun removeProduct(product: ProductEntity) {
-        _items.update { current -> current.filterNot { it.id == product.id } }
+    /**
+     * Vaciar carrito de ese cliente
+     */
+    fun clearCart(clienteId: Int) {
+        viewModelScope.launch {
+            cartDao.clear(clienteId)
+            _items.value = emptyList()
+        }
     }
 
-    fun clearCart() {
-        _items.value = emptyList()
-    }
-
-    fun total(): Double = _items.value.sumOf { it.precio }
+    /**
+     * Total calculado
+     */
+    fun total(): Double = _items.value.sumOf { it.precio * it.quantity }
 }

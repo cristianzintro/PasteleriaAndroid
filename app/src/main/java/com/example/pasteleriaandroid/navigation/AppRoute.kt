@@ -1,20 +1,21 @@
 package com.example.pasteleriaandroid.navigation
 
-// Definimos todas las rutas que usa la app
-enum class AppRoute(val route: String) {
-    Home("home"),
-    Catalogo("catalogo"),
-    Carrito("carrito"),
-    Registro("registro"),
-    Clientes("clientes"),
-    // detalle necesita un argumento
-    Detalle("detalle/{id}");
+sealed class AppRoute(val route: String) {
 
+    // Rutas que ya usas
+    object Home : AppRoute("home")
+    object Catalogo : AppRoute("catalogo")
+    object Carrito : AppRoute("carrito")
+    object Registro : AppRoute("registro")
+    object Clientes : AppRoute("clientes")
+    object Detalle : AppRoute("detalle")
+
+    // 👇 NUEVA RUTA PARA LA API
+    object Posts : AppRoute("posts")
+
+    // Constantes para argumentos (si las quieres usar)
     companion object {
-        // nombre del argumento que usaremos en NavGraph
         const val ARG_ID = "id"
-
-        // helper para navegar a un detalle concreto
-        fun detalleDe(id: String) = "detalle/$id"
+        const val ARG_CLIENTE_ID = "clienteId"
     }
 }

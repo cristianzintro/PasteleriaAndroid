@@ -5,13 +5,16 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [
+        ClienteEntity::class,
         ProductEntity::class,
-        ClienteEntity::class
+        CartItemEntity::class   // 👈 la nueva
     ],
-    version = 4,               // <- subir versión
+    version = 5,               // súbir version
     exportSchema = false
 )
 abstract class MilSaboresDb : RoomDatabase() {
-    abstract fun productDao(): ProductDao
+
     abstract fun clienteDao(): ClienteDao
+    abstract fun productDao(): ProductDao
+    abstract fun cartDao(): CartDao     // 👈 la nueva
 }
