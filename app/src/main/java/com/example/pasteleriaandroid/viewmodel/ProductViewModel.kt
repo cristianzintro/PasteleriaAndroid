@@ -4,23 +4,31 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pasteleriaandroid.data.room.DatabaseModule
+import com.example.pasteleriaandroid.data.room.ProductEntity
 import com.example.pasteleriaandroid.repository.ProductRepository
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 
 class ProductViewModel(app: Application) : AndroidViewModel(app) {
 
     private val db = DatabaseModule.getDatabase(app)
-    private val repo = ProductRepository(db.productDao())
+    private val productDao = db.productDao()
+    private val repository = ProductRepository(productDao)
 
-    val productos = repo.getProductos()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    private val _productos = MutableStateFlow<List<ProductEntity>>(emptyList())
+    val productos: StateFlow<List<ProductEntity>> = _productos
 
     init {
-        // 👇 al crear el VM, aseguramos que haya productos
         viewModelScope.launch {
-            repo.seedIfEmpty()
+            // llena la tabla si está vacía
+            repository.seedIfEmpty()
+
+            // escucha los cambios de Room
+            repository.getProductos().collectLatest { lista ->
+                _productos.value = lista
+            }
         }
     }
 }
