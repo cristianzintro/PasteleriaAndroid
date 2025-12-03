@@ -1,11 +1,22 @@
 package com.example.pasteleriaandroid.repository
 
+import com.example.pasteleriaandroid.data.remote.ApiService
+import com.example.pasteleriaandroid.data.remote.RetrofitInstance
 import com.example.pasteleriaandroid.data.room.ProductDao
 import com.example.pasteleriaandroid.data.room.ProductEntity
+import com.example.pasteleriaandroid.model.Producto
 
-class ProductRepository(private val dao: ProductDao) {
+class ProductRepository(
+    private val dao: ProductDao,
+    // 👇 por defecto usamos el ApiService de RetrofitInstance
+    private val api: ApiService = RetrofitInstance.api
+) {
 
-    // Room debería devolver Flow<List<ProductEntity>>
+    // ======================
+    // 🟣 PARTE LOCAL (ROOM)
+    // ======================
+
+    // Lo que ya tenías: sigue igual
     fun getProductos() = dao.getAll()
 
     suspend fun seedIfEmpty() {
@@ -76,5 +87,18 @@ class ProductRepository(private val dao: ProductDao) {
                 )
             )
         }
+    }
+
+    // ======================
+    // 🟣 PARTE REMOTA (API)
+    // ======================
+
+    // Productos desde Spring Boot (tabla conectada a XAMPP)
+    suspend fun getRemoteProductos(): List<Producto> {
+        return api.getProductos()
+    }
+
+    suspend fun getRemoteProductoById(id: Int): Producto {
+        return api.getProductoById(id)
     }
 }

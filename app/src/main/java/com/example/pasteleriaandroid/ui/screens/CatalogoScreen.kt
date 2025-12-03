@@ -1,6 +1,7 @@
 package com.example.pasteleriaandroid.ui.screens
 
-import androidx.compose.foundation.Image
+// 👇 OJO: ya no necesitamos Image
+// import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import com.example.pasteleriaandroid.data.room.ProductEntity
+import coil.compose.AsyncImage
+import com.example.pasteleriaandroid.model.Producto
 import com.example.pasteleriaandroid.viewmodel.ProductViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -30,7 +31,10 @@ fun CatalogoScreen(
     nav: NavController,
     vm: ProductViewModel = viewModel()
 ) {
-    val productos by vm.productos.collectAsState()
+    // 👇 Ahora usamos los productos REMOTOS (API)
+    val productos by vm.remoteProductos.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
+    val error by vm.error.collectAsState()
 
     var query by remember { mutableStateOf("") }
 
@@ -42,6 +46,11 @@ fun CatalogoScreen(
     val fondoCrema = MaterialTheme.colorScheme.surfaceVariant
     val bannerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
     val textoPrincipal = MaterialTheme.colorScheme.onSurface
+
+    // 👇 Al entrar a la pantalla, cargamos desde el backend Spring Boot
+    LaunchedEffect(Unit) {
+        vm.cargarProductosRemotos()
+    }
 
     Scaffold(
         topBar = {
@@ -107,6 +116,15 @@ fun CatalogoScreen(
                 shape = RoundedCornerShape(24.dp)
             )
 
+            // Mensajes de estado
+            if (isLoading) {
+                Text("Cargando productos...", color = textoPrincipal)
+            }
+
+            error?.let {
+                Text(it, color = MaterialTheme.colorScheme.error)
+            }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -120,7 +138,7 @@ fun CatalogoScreen(
 }
 
 @Composable
-private fun ProductRow(producto: ProductEntity) {
+private fun ProductRow(producto: Producto) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,9 +152,9 @@ private fun ProductRow(producto: ProductEntity) {
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen desde URL (GitHub RAW o lo que uses)
-            Image(
-                painter = rememberAsyncImagePainter(model = producto.imagen),
+            // Imagen desde URL (GitHub RAW) usando Coil
+            AsyncImage(
+                model = producto.imagen,
                 contentDescription = producto.nombre,
                 modifier = Modifier
                     .size(72.dp)
@@ -155,14 +173,15 @@ private fun ProductRow(producto: ProductEntity) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                // si no tienes categoria en la entidad, puedes quitar esta parte
-                Text(
-                    text = producto.descripcion,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                producto.descripcion?.let {
+                    Text(
+                        text = it,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Text(
                     text = "$${producto.precio}",
                     fontSize = 14.sp,

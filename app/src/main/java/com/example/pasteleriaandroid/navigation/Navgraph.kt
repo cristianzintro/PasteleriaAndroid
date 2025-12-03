@@ -60,9 +60,7 @@ fun AppNavGraph(nav: NavHostController) {
             DetalleProductoScreen(nav, id)
         }
 
-        // ➕ NUEVA RUTA: POSTS DESDE API
-        composable(AppRoute.Posts.route) {
-            PostsScreen(nav)
+
         }
     }
-}
+

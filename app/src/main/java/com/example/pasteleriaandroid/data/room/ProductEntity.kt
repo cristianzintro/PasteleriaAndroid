@@ -3,15 +3,12 @@ package com.example.pasteleriaandroid.data.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-// 👇 aquí forzamos a que la tabla se llame "productos"
-@Entity(tableName = "productos")
+@Entity(tableName = "productos")   // 👈 tabla correcta
 data class ProductEntity(
-    @PrimaryKey val id: Int,
-    val codigo: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val nombre: String,
-    val categoria: String,
-    val precio: Int,
     val descripcion: String,
-    val imagen: String
+    val precio: Int,
+    val imagen: String   // 👈 URL de la imagen
 )
-

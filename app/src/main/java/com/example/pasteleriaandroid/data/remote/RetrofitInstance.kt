@@ -3,10 +3,10 @@ package com.example.pasteleriaandroid.data.remote
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-private const val BASE_URL = "https://jsonplaceholder.typicode.com/"
-
-
 object RetrofitInstance {
+
+    // ⚠️ Importante: para el EMULADOR, localhost = 10.0.2.2
+    private const val BASE_URL = "http://10.0.2.2:8081/api/"
 
     val api: ApiService by lazy {
         Retrofit.Builder()

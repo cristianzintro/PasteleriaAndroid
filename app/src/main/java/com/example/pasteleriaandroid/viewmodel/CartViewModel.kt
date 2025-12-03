@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 data class CartUiItem(
     val id: Int,
     val nombre: String,
-    val precio: Double,   // 👈 ahora Double, igual que en ProductEntity
+    val precio: Int,   // 👈 ahora Int, igual que en ProductEntity
     val quantity: Int
 )
 
@@ -44,7 +44,7 @@ class CartViewModel(app: Application) : AndroidViewModel(app) {
                     CartUiItem(
                         id = cart.id,
                         nombre = it.nombre,
-                        precio = it.precio,      // 👈 ahora coincide el tipo
+                        precio = it.precio,      // 👈 ahora coincide el tipo (Int)
                         quantity = cart.quantity
                     )
                 }
@@ -67,5 +67,6 @@ class CartViewModel(app: Application) : AndroidViewModel(app) {
     /**
      * Total calculado
      */
-    fun total(): Double = _items.value.sumOf { it.precio * it.quantity }
+    fun total(): Double =
+        _items.value.sumOf { it.precio.toDouble() * it.quantity }
 }
