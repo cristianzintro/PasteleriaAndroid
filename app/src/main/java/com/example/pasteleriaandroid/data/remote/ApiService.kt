@@ -1,6 +1,11 @@
 package com.example.pasteleriaandroid.data.remote
 
 import com.example.pasteleriaandroid.model.Producto
+import com.example.pasteleriaandroid.dto.AgregarCarritoRequest
+import com.example.pasteleriaandroid.dto.MensajeResponse
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.POST
 import retrofit2.http.GET
 import retrofit2.http.Path
 
