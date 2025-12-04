@@ -4,9 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.pasteleriaandroid.ui.screens.*
+import com.example.pasteleriaandroid.ui.screens.HomeScreen
+import com.example.pasteleriaandroid.ui.screens.CatalogoScreen
+import com.example.pasteleriaandroid.ui.screens.CarritoScreen
+import com.example.pasteleriaandroid.ui.screens.RegistroScreen
+import com.example.pasteleriaandroid.ui.screens.ClientesScreen
+import com.example.pasteleriaandroid.ui.screens.DetalleProductoScreen
 
-// OJO: solo hay UNA función AppNavGraph
 @Composable
 fun AppNavGraph(nav: NavHostController) {
     NavHost(
@@ -59,8 +63,5 @@ fun AppNavGraph(nav: NavHostController) {
             val id = backStackEntry.arguments?.getString("id") ?: ""
             DetalleProductoScreen(nav, id)
         }
-
-
-        }
     }
-
+}

@@ -1,8 +1,5 @@
-package com.example.pasteleriaandroid.data.remote.dto
+package com.example.pasteleriaandroid.dto
 
-data class AgregarCarritoRequest(
-    val productoId: Int,
-    val cantidad: Int
+data class MensajeResponse(
+    val mensaje: String
 )
-
-
