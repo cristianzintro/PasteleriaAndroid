@@ -1,8 +1,7 @@
 package com.example.pasteleriaandroid.ui.screens
 
-// 👇 OJO: ya no necesitamos Image
-// import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.pasteleriaandroid.model.Producto
+import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.ProductViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +31,6 @@ fun CatalogoScreen(
     nav: NavController,
     vm: ProductViewModel = viewModel()
 ) {
-    // 👇 Ahora usamos los productos REMOTOS (API)
     val productos by vm.remoteProductos.collectAsState()
     val isLoading by vm.isLoading.collectAsState()
     val error by vm.error.collectAsState()
@@ -47,7 +46,6 @@ fun CatalogoScreen(
     val bannerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
     val textoPrincipal = MaterialTheme.colorScheme.onSurface
 
-    // 👇 Al entrar a la pantalla, cargamos desde el backend Spring Boot
     LaunchedEffect(Unit) {
         vm.cargarProductosRemotos()
     }
@@ -74,7 +72,6 @@ fun CatalogoScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
 
-            // Banner "Catálogo de Productos"
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +113,6 @@ fun CatalogoScreen(
                 shape = RoundedCornerShape(24.dp)
             )
 
-            // Mensajes de estado
             if (isLoading) {
                 Text("Cargando productos...", color = textoPrincipal)
             }
@@ -130,7 +126,13 @@ fun CatalogoScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(productosFiltrados, key = { it.id }) { producto ->
-                    ProductRow(producto)
+                    ProductRow(
+                        producto = producto,
+                        onClick = {
+                            // Navega al detalle usando AppRoute.DetalleProducto
+                            nav.navigate(AppRoute.DetalleProducto.createRoute(producto.id))
+                        }
+                    )
                 }
             }
         }
@@ -138,11 +140,15 @@ fun CatalogoScreen(
 }
 
 @Composable
-private fun ProductRow(producto: Producto) {
+private fun ProductRow(
+    producto: Producto,
+    onClick: () -> Unit
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(4.dp, RoundedCornerShape(20.dp)),
+            .shadow(4.dp, RoundedCornerShape(20.dp))
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
@@ -152,7 +158,6 @@ private fun ProductRow(producto: Producto) {
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen desde URL (GitHub RAW) usando Coil
             AsyncImage(
                 model = producto.imagen,
                 contentDescription = producto.nombre,

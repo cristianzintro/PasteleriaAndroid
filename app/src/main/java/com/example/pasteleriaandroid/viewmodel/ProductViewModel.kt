@@ -30,6 +30,10 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
     private val _remoteProductos = MutableStateFlow<List<Producto>>(emptyList())
     val remoteProductos: StateFlow<List<Producto>> = _remoteProductos
 
+    // Detalle de un producto remoto
+    private val _productoDetalle = MutableStateFlow<Producto?>(null)
+    val productoDetalle: StateFlow<Producto?> = _productoDetalle
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -37,19 +41,18 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
     val error: StateFlow<String?> = _error
 
     init {
-        // 👇 esto es lo que ya tenías: sigue igual
         viewModelScope.launch {
-            // llena la tabla si está vacía
+            // llena la tabla local si está vacía
             repository.seedIfEmpty()
 
-            // escucha los cambios de Room
+            // escucha cambios de Room
             repository.getProductos().collectLatest { lista ->
                 _productos.value = lista
             }
         }
     }
 
-    // 👇 NUEVO: carga productos desde tu backend Spring Boot
+    // Lista remota para el catálogo
     fun cargarProductosRemotos() {
         viewModelScope.launch {
             try {
@@ -61,6 +64,25 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 _error.value = "Error al cargar productos desde el servidor"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // Detalle remoto por id
+    fun cargarProductoPorId(id: Int) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                _error.value = null
+
+                val p = repository.getRemoteProductoById(id)
+                _productoDetalle.value = p
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _error.value = "No se pudo cargar el producto"
+                _productoDetalle.value = null
             } finally {
                 _isLoading.value = false
             }

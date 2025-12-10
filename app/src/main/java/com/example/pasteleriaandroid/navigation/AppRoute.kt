@@ -2,18 +2,21 @@ package com.example.pasteleriaandroid.navigation
 
 sealed class AppRoute(val route: String) {
 
-    // Rutas que ya usas
+    // Rutas principales
     object Home : AppRoute("home")
     object Catalogo : AppRoute("catalogo")
     object Carrito : AppRoute("carrito")
     object Registro : AppRoute("registro")
     object Clientes : AppRoute("clientes")
-    object Detalle : AppRoute("detalle")
 
-    // 👇 NUEVA RUTA PARA LA API
+    // 🔹 Detalle de producto con parámetro {id}
+    object DetalleProducto : AppRoute("detalle/{id}") {
+        fun createRoute(id: Int) = "detalle/$id"
+    }
+
+    // (Opcional) Ruta para posts de API externa
     object Posts : AppRoute("posts")
 
-    // Constantes para argumentos (si las quieres usar)
     companion object {
         const val ARG_ID = "id"
         const val ARG_CLIENTE_ID = "clienteId"

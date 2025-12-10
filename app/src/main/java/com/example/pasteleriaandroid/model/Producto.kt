@@ -7,5 +7,6 @@ data class Producto(
     val categoria: String?,
     val descripcion: String?,
     val precio: Int,
-    val imagen: String         // URL RAW de GitHub que llega desde el backend
+    val imagen: String,        // URL RAW de GitHub que llega desde el backend
+    val stock: Int? = null     // opcional, por si el backend lo envía
 )
