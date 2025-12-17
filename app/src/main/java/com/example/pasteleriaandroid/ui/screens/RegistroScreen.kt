@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.pasteleriaandroid.data.session.SessionManager
 import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.RegistroViewModel
 import kotlinx.coroutines.launch
@@ -26,7 +27,6 @@ import kotlinx.coroutines.launch
 fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
     val state by vm.state.collectAsState()
 
-    // estado del snackbar y scope para lanzarlo
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -35,21 +35,15 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
         topBar = {
             TopAppBar(
                 title = { Text("Registro de cliente") },
-
-                // 👇 botón para volver al home
                 navigationIcon = {
                     IconButton(onClick = {
                         nav.navigate(AppRoute.Home.route) {
                             popUpTo(AppRoute.Home.route) { inclusive = false }
                         }
                     }) {
-                        Icon(
-                            imageVector = Icons.Filled.Home,
-                            contentDescription = "Volver al inicio"
-                        )
+                        Icon(Icons.Filled.Home, contentDescription = "Volver al inicio")
                     }
                 },
-
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -64,58 +58,34 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            CampoTexto(
-                label = "Nombre completo",
-                value = state.nombre,
-                onValueChange = vm::onNombre,
-                error = state.errores["nombre"]
-            )
-            CampoTexto(
-                label = "Correo electrónico",
-                value = state.email,
-                onValueChange = vm::onEmail,
-                error = state.errores["email"],
-                keyboardType = KeyboardType.Email
-            )
-            CampoTexto(
-                label = "Teléfono",
-                value = state.telefono,
-                onValueChange = vm::onTelefono,
-                error = state.errores["telefono"],
-                keyboardType = KeyboardType.Number
-            )
+            CampoTexto("Nombre completo", state.nombre, vm::onNombre, state.errores["nombre"])
+            CampoTexto("Correo electrónico", state.email, vm::onEmail, state.errores["email"], KeyboardType.Email)
+            CampoTexto("Teléfono", state.telefono, vm::onTelefono, state.errores["telefono"], KeyboardType.Number)
 
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Checkbox(
                     checked = state.aceptoTerminos,
-                    onCheckedChange = vm::onTerminos,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colorScheme.primary
-                    )
+                    onCheckedChange = vm::onTerminos
                 )
                 Text("Acepto términos y condiciones")
             }
 
             Button(
                 onClick = {
-                    vm.enviar {
+                    vm.enviar { clienteIdCreado ->
+                        SessionManager.setClienteId(clienteIdCreado)
+
                         scope.launch {
-                            snackbarHostState.showSnackbar("¡Cuenta creada con éxito! 🎉")
+                            snackbarHostState.showSnackbar("¡Cuenta creada! Cliente #$clienteIdCreado ✅")
                         }
-                        // si quieres también puedes volver al home aquí:
-                        // nav.navigate(AppRoute.Home.route) { popUpTo(AppRoute.Home.route) { inclusive = false } }
+
+                        nav.navigate(AppRoute.Home.route) {
+                            popUpTo(AppRoute.Home.route) { inclusive = true }
+                        }
                     }
                 },
-
                 enabled = state.esValido,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Crear cuenta")
             }
@@ -140,24 +110,11 @@ private fun CampoTexto(
             isError = error != null,
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
-            ),
             modifier = Modifier.fillMaxWidth()
         )
 
-        AnimatedVisibility(
-            visible = error != null,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Text(
-                text = error ?: "",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+        AnimatedVisibility(visible = error != null, enter = fadeIn(), exit = fadeOut()) {
+            Text(text = error ?: "", color = MaterialTheme.colorScheme.error)
         }
     }
 }

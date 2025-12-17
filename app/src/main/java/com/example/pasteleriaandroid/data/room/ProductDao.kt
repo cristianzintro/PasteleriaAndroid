@@ -12,12 +12,12 @@ interface ProductDao {
     @Query("SELECT * FROM productos")
     fun getAll(): Flow<List<ProductEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(product: ProductEntity)
+    @Query("SELECT COUNT(*) FROM productos")
+    suspend fun count(): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(products: List<ProductEntity>)
 
-    @Query("SELECT COUNT(*) FROM productos")
-    suspend fun count(): Int
+    @Query("SELECT * FROM productos WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Int): ProductEntity?
 }

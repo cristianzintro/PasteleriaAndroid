@@ -12,6 +12,6 @@ object DatabaseModule {
                 context.applicationContext,
                 MilSaboresDb::class.java,
                 "mil_sabores_db"
-            ).fallbackToDestructiveMigration().build().also { INSTANCE = it }
+            ).fallbackToDestructiveMigration().build()
         }
 }

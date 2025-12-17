@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.pasteleriaandroid.data.session.SessionManager
+import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.CartViewModel
 import com.example.pasteleriaandroid.viewmodel.ProductViewModel
 
@@ -34,8 +36,7 @@ fun DetalleProductoScreen(
     val isLoading by productVm.isLoading.collectAsState()
     val error by productVm.error.collectAsState()
 
-    // por ahora usamos cliente 1 "quemado"
-    val clienteId = 1
+    val clienteId = SessionManager.getClienteId() ?: 0
 
     LaunchedEffect(productoId) {
         productVm.cargarProductoPorId(productoId)
@@ -49,10 +50,7 @@ fun DetalleProductoScreen(
                 title = { Text("Detalle del producto") },
                 navigationIcon = {
                     IconButton(onClick = { nav.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver"
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 colors = topAppBarColors(
@@ -69,32 +67,20 @@ fun DetalleProductoScreen(
                 .background(fondo)
         ) {
             when {
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
 
-                error != null -> {
-                    Text(
-                        text = error ?: "Error desconocido",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                error != null -> Text(
+                    text = error ?: "Error desconocido",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
 
-                producto == null -> {
-                    Text(
-                        text = "Producto no encontrado",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                producto == null -> Text(
+                    text = "Producto no encontrado",
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
 
                 else -> {
                     DetalleProductoContent(
@@ -105,14 +91,12 @@ fun DetalleProductoScreen(
                         categoria = producto!!.categoria,
                         codigo = producto!!.codigo,
                         onAgregarCarrito = {
-                            // aquí llamamos al ViewModel del carrito
-                            cartVm.addToCart(
-                                clienteId = clienteId,
-                                productoId = producto!!.id,
-                                quantity = 1
-                            )
-                            // Si quieres, puedes navegar al carrito o mostrar un mensaje
-                            // nav.navigate(AppRoute.Carrito.createRoute(clienteId))
+                            if (clienteId == 0) {
+                                nav.navigate(AppRoute.Registro.route)
+                            } else {
+                                cartVm.addToCart(clienteId, producto!!.id, 1)
+                                nav.navigate(AppRoute.Carrito.createRoute(clienteId))
+                            }
                         }
                     )
                 }
@@ -132,12 +116,8 @@ private fun DetalleProductoContent(
     onAgregarCarrito: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxSize().padding(16.dp)
     ) {
-
-        // Imagen grande
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,66 +128,39 @@ private fun DetalleProductoContent(
             AsyncImage(
                 model = imagenUrl,
                 contentDescription = nombre,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(24.dp))
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(24.dp))
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Text(
-            text = nombre,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text(nombre, fontSize = 22.sp, fontWeight = FontWeight.Bold)
 
         categoria?.let {
-            Text(
-                text = "Categoría: $it",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
+            Text("Categoría: $it", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
         }
 
         codigo?.let {
-            Text(
-                text = "Código: $it",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
+            Text("Código: $it", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(Modifier.height(12.dp))
+
+        Text("Descripción", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text(descripcion, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+
+        Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "Descripción",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Text(
-            text = descripcion,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Precio: $${precio}",
+            text = "Precio: $$precio",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // 🔹 BOTÓN: AGREGAR AL CARRITO
-        Button(
-            onClick = onAgregarCarrito,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Button(onClick = onAgregarCarrito, modifier = Modifier.fillMaxWidth()) {
             Text("Agregar al carrito")
         }
     }

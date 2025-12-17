@@ -4,21 +4,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.pasteleriaandroid.navigation.AppRoute
 import com.example.pasteleriaandroid.viewmodel.CartViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,33 +23,23 @@ fun CarritoScreen(
     clienteId: Int,
     vm: CartViewModel = viewModel()
 ) {
-    // cargar carrito cuando entro
-    LaunchedEffect(clienteId) {
-        vm.loadCart(clienteId)
-    }
+    LaunchedEffect(clienteId) { vm.loadCart(clienteId) }
 
     val items by vm.items.collectAsState()
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("Carrito de compras") },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        nav.navigate(AppRoute.Home.route) {
-                            popUpTo(AppRoute.Home.route) { inclusive = false }
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Home,
-                            contentDescription = "Ir al inicio"
-                        )
+                    IconButton(onClick = { nav.navigate(AppRoute.Home.route) }) {
+                        Icon(Icons.Filled.Home, contentDescription = "Inicio")
                     }
                 },
-                colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                colors = topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             )
         }
     ) { padding ->
@@ -65,36 +51,45 @@ fun CarritoScreen(
         ) {
             if (items.isEmpty()) {
                 Text("Tu carrito está vacío 🧁")
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = { nav.navigate(AppRoute.Catalogo.route) }) {
+                    Text("Ir al catálogo")
+                }
             } else {
+
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(items) { p ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color.White
-                            ),
-                            elevation = CardDefaults.cardElevation(2.dp)
-                        ) {
-                            ListItem(
-                                headlineContent = { Text(p.nombre) },
-                                supportingContent = {
-                                    Text("Precio: $${p.precio} • Cant: ${p.quantity}")
-                                },
-                                trailingContent = {
+                        Card {
+                            Column(Modifier.padding(12.dp)) {
+                                Text(p.nombre, style = MaterialTheme.typography.titleMedium)
+                                Text("Precio: $${p.precio}")
+                                Spacer(Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row {
+                                        IconButton(onClick = { vm.dec(clienteId, p) }) {
+                                            Icon(Icons.Filled.Remove, contentDescription = "Menos")
+                                        }
+                                        Text(" ${p.quantity} ")
+                                        IconButton(onClick = { vm.inc(clienteId, p) }) {
+                                            Icon(Icons.Filled.Add, contentDescription = "Más")
+                                        }
+                                    }
+
                                     IconButton(onClick = {
-                                        // si quieres eliminar 1 en específico,
-                                        // hay que agregar función extra en el VM y en el dao
+                                        vm.remove(clienteId, p.id)
+                                        scope.launch { snackbar.showSnackbar("Producto eliminado") }
                                     }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Delete,
-                                            contentDescription = "Eliminar"
-                                        )
+                                        Icon(Icons.Filled.Delete, contentDescription = "Eliminar")
                                     }
                                 }
-                            )
+                            }
                         }
                     }
                 }
@@ -103,14 +98,17 @@ fun CarritoScreen(
 
                 Text(
                     text = "Total: $${vm.total()}",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
 
                 Spacer(Modifier.height(8.dp))
 
                 Button(
-                    onClick = { vm.clearCart(clienteId) },
+                    onClick = {
+                        vm.clearCart(clienteId)
+                        scope.launch { snackbar.showSnackbar("Carrito vaciado") }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Vaciar carrito")

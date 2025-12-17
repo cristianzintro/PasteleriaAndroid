@@ -17,11 +17,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.pasteleriaandroid.data.session.SessionManager
 import com.example.pasteleriaandroid.navigation.AppRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(nav: NavController) {
+
+    val clienteId = SessionManager.getClienteId()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -33,9 +37,8 @@ fun HomeScreen(nav: NavController) {
                                 .clip(CircleShape)
                                 .background(Color(0xFFFFB6C8)),
                             contentAlignment = Alignment.Center
-                        ) {
-                            Text("🍰", fontSize = 18.sp)
-                        }
+                        ) { Text("🍰", fontSize = 18.sp) }
+
                         Spacer(Modifier.width(12.dp))
                         Text("Mil Sabores", fontWeight = FontWeight.SemiBold)
                     }
@@ -56,7 +59,6 @@ fun HomeScreen(nav: NavController) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             Text(
                 text = "Bienvenido a Pastelería Mil Sabores 🎂",
                 color = Color(0xFF5A3A2E),
@@ -65,16 +67,11 @@ fun HomeScreen(nav: NavController) {
             )
 
             Text(
-                text = "¿Qué quieres hacer hoy?",
+                text = if (clienteId != null) "Sesión activa: Cliente #$clienteId"
+                else "Aún no tienes sesión (regístrate para comprar).",
                 color = Color(0xFF5A3A2E)
             )
-            Button(
-                onClick = { nav.navigate(AppRoute.Posts.route) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Ver Posts desde API")
-            }
-            // 👉 catálogo
+
             Button(
                 onClick = { nav.navigate(AppRoute.Catalogo.route) },
                 modifier = Modifier.fillMaxWidth(),
@@ -83,39 +80,26 @@ fun HomeScreen(nav: NavController) {
                     containerColor = Color(0xFFAC5A29),
                     contentColor = Color.White
                 )
-            ) {
-                Text("Ver catálogo")
-            }
+            ) { Text("Ver catálogo") }
 
-            // 👉 carrito
             OutlinedButton(
-                onClick = { nav.navigate(AppRoute.Carrito.route) },
+                onClick = {
+                    val id = SessionManager.getClienteId()
+                    if (id == null) nav.navigate(AppRoute.Registro.route)
+                    else nav.navigate(AppRoute.Carrito.createRoute(id))
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp)
             ) {
-                Text("Ir al carrito")
+                Text(if (clienteId == null) "Registrarse para usar carrito" else "Ir al carrito")
             }
 
-            // 👉 registro
             OutlinedButton(
                 onClick = { nav.navigate(AppRoute.Registro.route) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFF5A3A2E)
-                )
-            ) {
-                Text("Registrarse")
-            }
-
-            // 👉 clientes (ya que tienes ClientesScreen.kt)
-            OutlinedButton(
-                onClick = { nav.navigate(AppRoute.Clientes.route) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Text("Ver clientes")
-            }
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF5A3A2E))
+            ) { Text("Registrarse") }
         }
     }
 }

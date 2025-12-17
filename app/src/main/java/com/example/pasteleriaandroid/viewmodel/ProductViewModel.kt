@@ -7,10 +7,12 @@ import com.example.pasteleriaandroid.data.room.DatabaseModule
 import com.example.pasteleriaandroid.data.room.ProductEntity
 import com.example.pasteleriaandroid.model.Producto
 import com.example.pasteleriaandroid.repository.ProductRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ProductViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -30,7 +32,6 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
     private val _remoteProductos = MutableStateFlow<List<Producto>>(emptyList())
     val remoteProductos: StateFlow<List<Producto>> = _remoteProductos
 
-    // Detalle de un producto remoto
     private val _productoDetalle = MutableStateFlow<Producto?>(null)
     val productoDetalle: StateFlow<Producto?> = _productoDetalle
 
@@ -42,24 +43,27 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            // llena la tabla local si está vacía
-            repository.seedIfEmpty()
+            // ✅ Todo lo de BD pesado a IO
+            withContext(Dispatchers.IO) {
+                repository.seedIfEmpty()
+            }
 
-            // escucha cambios de Room
+            // ✅ Room Flow se puede colectar en Main, pero si quieres ultra-seguro:
             repository.getProductos().collectLatest { lista ->
                 _productos.value = lista
             }
         }
     }
 
-    // Lista remota para el catálogo
     fun cargarProductosRemotos() {
         viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
             try {
-                _isLoading.value = true
-                _error.value = null
-
-                val lista = repository.getRemoteProductos()
+                // ✅ Red/API a IO
+                val lista = withContext(Dispatchers.IO) {
+                    repository.getRemoteProductos()
+                }
                 _remoteProductos.value = lista
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -70,14 +74,14 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // Detalle remoto por id
     fun cargarProductoPorId(id: Int) {
         viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
             try {
-                _isLoading.value = true
-                _error.value = null
-
-                val p = repository.getRemoteProductoById(id)
+                val p = withContext(Dispatchers.IO) {
+                    repository.getRemoteProductoById(id)
+                }
                 _productoDetalle.value = p
             } catch (e: Exception) {
                 e.printStackTrace()

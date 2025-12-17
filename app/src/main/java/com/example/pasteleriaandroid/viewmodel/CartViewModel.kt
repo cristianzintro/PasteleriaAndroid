@@ -10,9 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-// Modelo mostrado en la UI
 data class CartUiItem(
-    val id: Int,
+    val id: Int,        // id del registro en cart_items
     val nombre: String,
     val precio: Int,
     val quantity: Int
@@ -27,53 +26,62 @@ class CartViewModel(app: Application) : AndroidViewModel(app) {
     private val _items = MutableStateFlow<List<CartUiItem>>(emptyList())
     val items: StateFlow<List<CartUiItem>> = _items
 
-    /**
-     * Cargar productos del carrito desde Room (por cliente)
-     */
     fun loadCart(clienteId: Int) {
         viewModelScope.launch {
-            val cartRows: List<CartItemEntity> = cartDao.getCartByCliente(clienteId)
+            val cartRows = cartDao.getCartByCliente(clienteId)
             val productos = productDao.getAll().first()
 
-            val uiList = cartRows.mapNotNull { cart ->
-                val p = productos.find { it.id == cart.productId }
+            _items.value = cartRows.mapNotNull { row ->
+                val p = productos.find { it.id == row.productId }
                 p?.let {
                     CartUiItem(
-                        id = cart.id,
+                        id = row.id,
                         nombre = it.nombre,
                         precio = it.precio,
-                        quantity = cart.quantity
+                        quantity = row.quantity
                     )
                 }
             }
-
-            _items.value = uiList
         }
     }
 
-    /**
-     * AGREGAR PRODUCTO AL CARRITO
-     */
     fun addToCart(clienteId: Int, productoId: Int, quantity: Int = 1) {
         viewModelScope.launch {
-
-            val item = CartItemEntity(
-                id = 0,             // autogenerado por Room
-                clienteId = clienteId,
-                productId = productoId,
-                quantity = quantity
+            cartDao.addToCart(
+                CartItemEntity(
+                    id = 0,
+                    clienteId = clienteId,
+                    productId = productoId,
+                    quantity = quantity
+                )
             )
-
-            cartDao.addToCart(item)  // <-- AQUÍ EL AJUSTE
-
-            // Refrescar el carrito
             loadCart(clienteId)
         }
     }
 
-    /**
-     * Vaciar carrito
-     */
+    fun inc(clienteId: Int, item: CartUiItem) {
+        viewModelScope.launch {
+            cartDao.updateQuantity(item.id, item.quantity + 1)
+            loadCart(clienteId)
+        }
+    }
+
+    fun dec(clienteId: Int, item: CartUiItem) {
+        viewModelScope.launch {
+            val newQ = item.quantity - 1
+            if (newQ <= 0) cartDao.remove(item.id)
+            else cartDao.updateQuantity(item.id, newQ)
+            loadCart(clienteId)
+        }
+    }
+
+    fun remove(clienteId: Int, cartItemId: Int) {
+        viewModelScope.launch {
+            cartDao.remove(cartItemId)
+            loadCart(clienteId)
+        }
+    }
+
     fun clearCart(clienteId: Int) {
         viewModelScope.launch {
             cartDao.clear(clienteId)
@@ -81,9 +89,5 @@ class CartViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /**
-     * Total del carrito
-     */
-    fun total(): Double =
-        _items.value.sumOf { it.precio.toDouble() * it.quantity }
+    fun total(): Int = _items.value.sumOf { it.precio * it.quantity }
 }

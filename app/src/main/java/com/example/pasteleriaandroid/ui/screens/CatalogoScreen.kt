@@ -43,7 +43,6 @@ fun CatalogoScreen(
     }
 
     val fondoCrema = MaterialTheme.colorScheme.surfaceVariant
-    val bannerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
     val textoPrincipal = MaterialTheme.colorScheme.onSurface
 
     LaunchedEffect(Unit) {
@@ -55,7 +54,7 @@ fun CatalogoScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Catálogo",
+                        text = "Nuestro Catálogo",
                         color = textoPrincipal,
                         fontWeight = FontWeight.Bold
                     )
@@ -72,22 +71,7 @@ fun CatalogoScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
-                    .shadow(4.dp, RoundedCornerShape(24.dp))
-                    .background(bannerColor, RoundedCornerShape(24.dp))
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Catálogo de Productos",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = textoPrincipal
-                )
-            }
+            // ✅ Ya no hay banner difuminado (Box eliminado)
 
             Text(
                 text = "Explora nuestras tortas, pasteles y productos especiales.",
@@ -129,7 +113,7 @@ fun CatalogoScreen(
                     ProductRow(
                         producto = producto,
                         onClick = {
-                            // Navega al detalle usando AppRoute.DetalleProducto
+                            // ✅ Catálogo → Detalle
                             nav.navigate(AppRoute.DetalleProducto.createRoute(producto.id))
                         }
                     )
@@ -168,9 +152,7 @@ private fun ProductRow(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = producto.nombre,
                     fontSize = 16.sp,
@@ -178,6 +160,7 @@ private fun ProductRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+
                 producto.descripcion?.let {
                     Text(
                         text = it,
@@ -187,6 +170,7 @@ private fun ProductRow(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+
                 Text(
                     text = "$${producto.precio}",
                     fontSize = 14.sp,
